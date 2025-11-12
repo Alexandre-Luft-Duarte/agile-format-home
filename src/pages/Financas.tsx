@@ -46,24 +46,14 @@ const Financas = () => {
       <main className="max-w-md mx-auto px-6 py-6 space-y-6">
         {/* Summary Cards */}
         <div className="grid grid-cols-2 gap-4">
-          <SummaryCard
-            title="Total Pago"
-            value={totalPaid}
-            icon={CheckCircle2}
-            variant="paid"
-          />
-          <SummaryCard
-            title="Saldo Devedor"
-            value={outstandingBalance}
-            icon={AlertCircle}
-            variant="pending"
-          />
+          <SummaryCard title="Total Pago" value={totalPaid} icon={CheckCircle2} variant="paid" />
+          <SummaryCard title="Devendo" value={outstandingBalance} icon={AlertCircle} variant="pending" />
         </div>
 
         {/* Installments Section */}
         <div className="space-y-4">
           <h2 className="text-xl font-bold text-foreground">Minhas Parcelas</h2>
-          
+
           <div className="space-y-3">
             {mockInstallments.map((installment) => (
               <InstallmentItem
