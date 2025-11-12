@@ -16,12 +16,12 @@ const SummaryCard = ({ title, value, icon: Icon, variant = "paid" }: SummaryCard
     <Card className="shadow-card">
       <CardContent className="p-4">
         <div className="flex items-center gap-3">
-          <div className={`p-3 rounded-lg ${bgColor}`}>
+          <div className={`p-3 rounded-lg ${bgColor} shrink-0`}>
             <Icon className={`h-5 w-5 ${iconColor}`} />
           </div>
-          <div className="flex-1">
-            <p className="text-xs text-muted-foreground mb-1">{title}</p>
-            <p className="text-xl font-bold">{value}</p>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs text-muted-foreground mb-1.5">{title}</p>
+            <p className="text-xl font-bold text-foreground">{value}</p>
           </div>
         </div>
       </CardContent>
