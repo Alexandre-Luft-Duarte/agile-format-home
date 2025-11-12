@@ -11,10 +11,10 @@ interface SummaryCardProps {
 const SummaryCard = ({ title, value, icon: Icon, variant = "paid" }: SummaryCardProps) => {
   const bgColor = variant === "paid" ? "bg-accent/20" : "bg-primary/10";
   const iconColor = variant === "paid" ? "text-accent-foreground" : "text-primary";
-  
+
   return (
     <Card className="shadow-card">
-      <CardContent className="p-4">
+      <CardContent className="p-2">
         <div className="flex items-center gap-3">
           <div className={`p-3 rounded-lg ${bgColor} shrink-0`}>
             <Icon className={`h-5 w-5 ${iconColor}`} />
