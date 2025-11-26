@@ -6,7 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { MessageSquare, X, Trash2 } from "lucide-react";
-import CreatePollDialog from "@/components/CreatePollDialog";
+import { CreatePollDialog } from "@/components/CreatePollDialog";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -38,6 +38,7 @@ interface PollOption {
 const AdminCommunication = () => {
   const [polls, setPolls] = useState<Poll[]>([]);
   const [pollOptions, setPollOptions] = useState<Record<string, PollOption[]>>({});
+  const [showCreatePoll, setShowCreatePoll] = useState(false);
 
   useEffect(() => {
     document.title = "Gestão de Comunicação - Forma Ágil";
@@ -117,7 +118,13 @@ const AdminCommunication = () => {
       </header>
 
       <div className="max-w-md mx-auto px-4 py-6 space-y-6">
-        <CreatePollDialog onPollCreated={fetchPolls} />
+        <Button 
+          className="w-full" 
+          onClick={() => setShowCreatePoll(true)}
+        >
+          <MessageSquare className="h-4 w-4 mr-2" />
+          Nova Enquete
+        </Button>
         
         {polls.length === 0 ? (
           <Card>
@@ -224,6 +231,14 @@ const AdminCommunication = () => {
           })
         )}
       </div>
+
+      <CreatePollDialog 
+        open={showCreatePoll} 
+        onOpenChange={(open) => {
+          setShowCreatePoll(open);
+          if (!open) fetchPolls();
+        }}
+      />
 
       <BottomNavigation />
     </div>

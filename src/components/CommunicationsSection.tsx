@@ -10,12 +10,20 @@ interface Poll {
   created_at: string;
 }
 
+interface Announcement {
+  id: string;
+  title: string;
+  created_at: string;
+}
+
 const CommunicationsSection = () => {
   const [polls, setPolls] = useState<Poll[]>([]);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchRecentPolls();
+    fetchRecentAnnouncements();
   }, []);
 
   const fetchRecentPolls = async () => {
@@ -24,10 +32,22 @@ const CommunicationsSection = () => {
       .select("id, title, created_at")
       .eq("status", "active")
       .order("created_at", { ascending: false })
-      .limit(3);
+      .limit(2);
 
     if (data) {
       setPolls(data as Poll[]);
+    }
+  };
+
+  const fetchRecentAnnouncements = async () => {
+    const { data } = await supabase
+      .from("announcements")
+      .select("id, title, created_at")
+      .order("created_at", { ascending: false })
+      .limit(2);
+
+    if (data) {
+      setAnnouncements(data as Announcement[]);
     }
   };
 
@@ -52,9 +72,9 @@ const CommunicationsSection = () => {
             <div className="p-2 rounded-lg bg-accent/20">
               <Bell className="h-5 w-5 text-accent-foreground" />
             </div>
-            <CardTitle className="text-lg">Enquetes Ativas</CardTitle>
+            <CardTitle className="text-lg">Comunicações</CardTitle>
           </div>
-          {polls.length > 0 && (
+          {(polls.length > 0 || announcements.length > 0) && (
             <button
               onClick={() => navigate("/comunicacao")}
               className="text-xs text-primary hover:underline"
@@ -65,13 +85,30 @@ const CommunicationsSection = () => {
         </div>
       </CardHeader>
       <CardContent>
-        {polls.length === 0 ? (
+        {polls.length === 0 && announcements.length === 0 ? (
           <div className="text-center py-6 text-muted-foreground text-sm">
             <MessageSquare className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p>Nenhuma enquete ativa</p>
+            <p>Nenhuma comunicação no momento</p>
           </div>
         ) : (
           <div className="space-y-3">
+            {announcements.map((announcement) => (
+              <div
+                key={announcement.id}
+                onClick={() => navigate("/comunicacao")}
+                className="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+              >
+                <div className="p-2 rounded-full bg-accent/10 mt-0.5">
+                  <Bell className="h-4 w-4 text-accent-foreground" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium leading-tight">{announcement.title}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {getRelativeTime(announcement.created_at)}
+                  </p>
+                </div>
+              </div>
+            ))}
             {polls.map((poll) => (
               <div
                 key={poll.id}

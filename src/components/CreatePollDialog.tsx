@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,11 +9,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 interface CreatePollDialogProps {
-  onPollCreated: () => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-const CreatePollDialog = ({ onPollCreated }: CreatePollDialogProps) => {
-  const [open, setOpen] = useState(false);
+export const CreatePollDialog = ({ open, onOpenChange }: CreatePollDialogProps) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [options, setOptions] = useState(["", ""]);
@@ -83,11 +83,10 @@ const CreatePollDialog = ({ onPollCreated }: CreatePollDialogProps) => {
       if (optionsError) throw optionsError;
 
       toast.success("Enquete criada com sucesso!");
-      setOpen(false);
       setTitle("");
       setDescription("");
       setOptions(["", ""]);
-      onPollCreated();
+      onOpenChange(false);
     } catch (error) {
       console.error("Error creating poll:", error);
       toast.error("Erro ao criar enquete");
@@ -97,13 +96,7 @@ const CreatePollDialog = ({ onPollCreated }: CreatePollDialogProps) => {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="w-full">
-          <Plus className="h-4 w-4 mr-2" />
-          Nova Enquete
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Criar Nova Enquete</DialogTitle>
@@ -170,7 +163,7 @@ const CreatePollDialog = ({ onPollCreated }: CreatePollDialogProps) => {
             <Button
               type="button"
               variant="outline"
-              onClick={() => setOpen(false)}
+              onClick={() => onOpenChange(false)}
               className="flex-1"
             >
               Cancelar
@@ -184,5 +177,3 @@ const CreatePollDialog = ({ onPollCreated }: CreatePollDialogProps) => {
     </Dialog>
   );
 };
-
-export default CreatePollDialog;

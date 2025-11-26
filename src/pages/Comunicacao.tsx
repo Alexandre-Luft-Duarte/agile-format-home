@@ -4,9 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
-import { MessageSquare, CheckCircle2 } from "lucide-react";
+import { MessageSquare, CheckCircle2, Bell } from "lucide-react";
 import { toast } from "sonner";
+import { formatDistanceToNow } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 interface Poll {
   id: string;
@@ -23,6 +26,13 @@ interface PollOption {
   vote_count: number;
 }
 
+interface Announcement {
+  id: string;
+  title: string;
+  content: string;
+  created_at: string;
+}
+
 interface UserVote {
   poll_id: string;
   option_id: string;
@@ -32,36 +42,66 @@ const Comunicacao = () => {
   const [polls, setPolls] = useState<Poll[]>([]);
   const [pollOptions, setPollOptions] = useState<Record<string, PollOption[]>>({});
   const [userVotes, setUserVotes] = useState<UserVote[]>([]);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     document.title = "Comunicação - Forma Ágil";
     fetchPolls();
+    fetchAnnouncements();
     fetchUserVotes();
   }, []);
 
   const fetchPolls = async () => {
-    const { data: pollsData } = await supabase
-      .from("polls")
-      .select("*")
-      .eq("status", "active")
-      .order("created_at", { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from("polls")
+        .select("id, title, description, status, created_at")
+        .eq("status", "active")
+        .order("created_at", { ascending: false });
 
-    if (pollsData) {
-      setPolls(pollsData as Poll[]);
-
-      const optionsMap: Record<string, PollOption[]> = {};
-      for (const poll of pollsData) {
-        const { data: options } = await supabase
-          .from("poll_options")
-          .select("*")
-          .eq("poll_id", poll.id);
-
-        if (options) {
-          optionsMap[poll.id] = options as PollOption[];
-        }
+      if (error) throw error;
+      
+      if (data) {
+        setPolls(data as Poll[]);
+        
+        // Fetch options for each poll
+        const optionsPromises = data.map(poll =>
+          supabase
+            .from("poll_options")
+            .select("*")
+            .eq("poll_id", poll.id)
+            .order("created_at")
+        );
+        
+        const optionsResults = await Promise.all(optionsPromises);
+        const optionsMap: Record<string, PollOption[]> = {};
+        
+        data.forEach((poll, index) => {
+          optionsMap[poll.id] = optionsResults[index].data || [];
+        });
+        
+        setPollOptions(optionsMap);
       }
-      setPollOptions(optionsMap);
+    } catch (error) {
+      console.error("Error fetching polls:", error);
+      toast.error("Erro ao carregar enquetes");
+    }
+  };
+
+  const fetchAnnouncements = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("announcements")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(10);
+
+      if (error) throw error;
+      setAnnouncements(data || []);
+    } catch (error) {
+      console.error("Error fetching announcements:", error);
+      toast.error("Erro ao carregar avisos");
     }
   };
 
@@ -133,15 +173,51 @@ const Comunicacao = () => {
       </header>
 
       <div className="max-w-md mx-auto px-4 py-6 space-y-6">
-        {polls.length === 0 ? (
-          <Card>
-            <CardContent className="p-8 text-center text-muted-foreground">
-              <MessageSquare className="h-12 w-12 mx-auto mb-3 opacity-50" />
-              <p>Nenhuma enquete ativa no momento</p>
-            </CardContent>
-          </Card>
-        ) : (
-          polls.map((poll) => {
+        {/* Announcements Section */}
+        {announcements.length > 0 && (
+          <div className="space-y-3">
+            <h2 className="text-lg font-semibold">Avisos</h2>
+            {announcements.map((announcement) => (
+              <Card key={announcement.id} className="shadow-card">
+                <CardContent className="p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 rounded-full bg-accent/20 mt-0.5">
+                      <Bell className="h-4 w-4 text-accent-foreground" />
+                    </div>
+                    <div className="flex-1 space-y-1">
+                      <div className="flex items-start justify-between gap-2">
+                        <h3 className="font-semibold">{announcement.title}</h3>
+                        <span className="text-xs text-muted-foreground whitespace-nowrap">
+                          {formatDistanceToNow(new Date(announcement.created_at), {
+                            addSuffix: true,
+                            locale: ptBR
+                          })}
+                        </span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">{announcement.content}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+
+        {/* Separator */}
+        {announcements.length > 0 && polls.length > 0 && <Separator />}
+
+        {/* Polls Section */}
+        <div className="space-y-3">
+          {polls.length > 0 && <h2 className="text-lg font-semibold">Enquetes</h2>}
+          {polls.length === 0 && announcements.length === 0 ? (
+            <Card>
+              <CardContent className="p-8 text-center text-muted-foreground">
+                <MessageSquare className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                <p>Nenhuma comunicação ativa no momento</p>
+              </CardContent>
+            </Card>
+          ) : (
+            polls.map((poll) => {
             const options = pollOptions[poll.id] || [];
             const totalVotes = getTotalVotes(poll.id);
             const voted = hasVoted(poll.id);
@@ -214,7 +290,8 @@ const Comunicacao = () => {
               </Card>
             );
           })
-        )}
+          )}
+        </div>
       </div>
 
       <BottomNavigation />
