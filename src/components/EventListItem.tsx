@@ -1,14 +1,18 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Calendar, MapPin } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Calendar, MapPin, Pencil, Trash2 } from "lucide-react";
 
 interface EventListItemProps {
   name: string;
   date: string;
   location: string;
   image: string;
+  isAdmin?: boolean;
+  onEdit?: () => void;
+  onDelete?: () => void;
 }
 
-const EventListItem = ({ name, date, location, image }: EventListItemProps) => {
+const EventListItem = ({ name, date, location, image, isAdmin, onEdit, onDelete }: EventListItemProps) => {
   return (
     <Card className="overflow-hidden shadow-card hover:shadow-elevated transition-all duration-300">
       <div className="relative h-32 overflow-hidden">
@@ -28,6 +32,28 @@ const EventListItem = ({ name, date, location, image }: EventListItemProps) => {
           <MapPin className="h-4 w-4" />
           <span>{location}</span>
         </div>
+        {isAdmin && (
+          <div className="flex gap-2 pt-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onEdit}
+              className="flex-1"
+            >
+              <Pencil className="h-4 w-4 mr-1" />
+              Editar
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={onDelete}
+              className="flex-1"
+            >
+              <Trash2 className="h-4 w-4 mr-1" />
+              Excluir
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
