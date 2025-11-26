@@ -5,11 +5,18 @@ import CommunicationsSection from "@/components/CommunicationsSection";
 import BottomNavigation from "@/components/BottomNavigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import eventImage from "@/assets/event-100-days.jpg";
+import { format, isFuture, parseISO } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import eventPlaceholder from "@/assets/event-placeholder.jpg";
 
 const Index = () => {
   const { user } = useAuth();
   const [studentName, setStudentName] = useState<string>("Usuário");
+  const [nextEvent, setNextEvent] = useState<{
+    name: string;
+    date: string;
+    image: string;
+  } | null>(null);
 
   useEffect(() => {
     document.title = "Início - Forma Ágil";
@@ -32,13 +39,35 @@ const Index = () => {
 
     fetchUserProfile();
   }, [user]);
+
+  useEffect(() => {
+    const fetchNextEvent = async () => {
+      const { data, error } = await supabase
+        .from("events")
+        .select("*")
+        .order("date", { ascending: true });
+
+      if (data && !error) {
+        const upcomingEvents = data.filter((event) =>
+          isFuture(parseISO(event.date))
+        );
+
+        if (upcomingEvents.length > 0) {
+          const event = upcomingEvents[0];
+          setNextEvent({
+            name: event.title,
+            date: format(parseISO(event.date), "d 'de' MMMM", { locale: ptBR }),
+            image: event.image_url || eventPlaceholder,
+          });
+        }
+      }
+    };
+
+    fetchNextEvent();
+  }, []);
+
   const nextInstallment = "R$ 300,00";
   const outstandingBalance = "R$ 3.300,00";
-  const nextEvent = {
-    name: "Festa de 100 Dias",
-    date: "25 de Março",
-    image: eventImage,
-  };
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -62,11 +91,13 @@ const Index = () => {
         />
 
         {/* Event Card */}
-        <EventCard
-          eventName={nextEvent.name}
-          eventDate={nextEvent.date}
-          eventImage={nextEvent.image}
-        />
+        {nextEvent && (
+          <EventCard
+            eventName={nextEvent.name}
+            eventDate={nextEvent.date}
+            eventImage={nextEvent.image}
+          />
+        )}
 
         {/* Communications Section */}
         <CommunicationsSection />
