@@ -2,67 +2,74 @@ import { useState, useEffect } from "react";
 import BottomNavigation from "@/components/BottomNavigation";
 import EventListItem from "@/components/EventListItem";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import event100Days from "@/assets/event-100-days.jpg";
-import eventGala from "@/assets/event-gala.jpg";
-import eventBBQ from "@/assets/event-bbq.jpg";
-import eventTrip from "@/assets/event-trip.jpg";
-import eventReception from "@/assets/event-reception.jpg";
-import eventIntegration from "@/assets/event-integration.jpg";
+import { supabase } from "@/integrations/supabase/client";
+import { format, isPast, parseISO } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import placeholderImage from "@/assets/event-placeholder.jpg";
 
-const mockUpcomingEvents = [
-  {
-    id: 1,
-    name: "Festa de 100 Dias",
-    date: "25 de Março de 2025",
-    location: "Espaço Villa da Mata",
-    image: event100Days,
-  },
-  {
-    id: 2,
-    name: "Baile de Gala",
-    date: "15 de Maio de 2025",
-    location: "Grand Hotel São Paulo",
-    image: eventGala,
-  },
-  {
-    id: 3,
-    name: "Churrasco da Turma",
-    date: "8 de Junho de 2025",
-    location: "Chácara Recanto Verde",
-    image: eventBBQ,
-  },
-  {
-    id: 4,
-    name: "Viagem de Formatura",
-    date: "20 de Julho de 2025",
-    location: "Porto Seguro, BA",
-    image: eventTrip,
-  },
-];
-
-const mockPastEvents = [
-  {
-    id: 5,
-    name: "Festa de Recepção",
-    date: "10 de Fevereiro de 2025",
-    location: "Clube Universitário",
-    image: eventReception,
-  },
-  {
-    id: 6,
-    name: "Encontro de Integração",
-    date: "5 de Janeiro de 2025",
-    location: "Parque da Cidade",
-    image: eventIntegration,
-  },
-];
+interface Event {
+  id: string;
+  title: string;
+  date: string;
+  location: string | null;
+  image_url: string | null;
+}
 
 const Eventos = () => {
   const [activeTab, setActiveTab] = useState("upcoming");
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     document.title = "Eventos da Turma - Forma Ágil";
+    fetchEvents();
   }, []);
+
+  const fetchEvents = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("events")
+        .select("*")
+        .order("date", { ascending: true });
+
+      if (error) throw error;
+      setEvents(data || []);
+    } catch (error) {
+      console.error("Erro ao buscar eventos:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Set up realtime subscription
+  useEffect(() => {
+    const channel = supabase
+      .channel("events-changes")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "events",
+        },
+        () => {
+          fetchEvents();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const formatEventDate = (dateString: string) => {
+    const date = parseISO(dateString);
+    return format(date, "d 'de' MMMM 'de' yyyy", { locale: ptBR });
+  };
+
+  const upcomingEvents = events.filter((event) => !isPast(parseISO(event.date)));
+  const pastEvents = events.filter((event) => isPast(parseISO(event.date)));
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-background/95 pb-20">
@@ -86,27 +93,43 @@ const Eventos = () => {
           </TabsList>
 
           <TabsContent value="upcoming" className="space-y-4">
-            {mockUpcomingEvents.map((event) => (
-              <EventListItem
-                key={event.id}
-                name={event.name}
-                date={event.date}
-                location={event.location}
-                image={event.image}
-              />
-            ))}
+            {loading ? (
+              <p className="text-center text-muted-foreground py-8">Carregando eventos...</p>
+            ) : upcomingEvents.length === 0 ? (
+              <p className="text-center text-muted-foreground py-8">
+                Nenhum evento próximo encontrado.
+              </p>
+            ) : (
+              upcomingEvents.map((event) => (
+                <EventListItem
+                  key={event.id}
+                  name={event.title}
+                  date={formatEventDate(event.date)}
+                  location={event.location || "Local a definir"}
+                  image={event.image_url || placeholderImage}
+                />
+              ))
+            )}
           </TabsContent>
 
           <TabsContent value="past" className="space-y-4">
-            {mockPastEvents.map((event) => (
-              <EventListItem
-                key={event.id}
-                name={event.name}
-                date={event.date}
-                location={event.location}
-                image={event.image}
-              />
-            ))}
+            {loading ? (
+              <p className="text-center text-muted-foreground py-8">Carregando eventos...</p>
+            ) : pastEvents.length === 0 ? (
+              <p className="text-center text-muted-foreground py-8">
+                Nenhum evento passado encontrado.
+              </p>
+            ) : (
+              pastEvents.map((event) => (
+                <EventListItem
+                  key={event.id}
+                  name={event.title}
+                  date={formatEventDate(event.date)}
+                  location={event.location || "Local a definir"}
+                  image={event.image_url || placeholderImage}
+                />
+              ))
+            )}
           </TabsContent>
         </Tabs>
       </div>

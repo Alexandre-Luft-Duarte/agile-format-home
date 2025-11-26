@@ -38,6 +38,42 @@ export type Database = {
         }
         Relationships: []
       }
+      events: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          date: string
+          description: string | null
+          id: string
+          image_url: string | null
+          location: string | null
+          status: string
+          title: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          date: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          status?: string
+          title: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          date?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          status?: string
+          title?: string
+        }
+        Relationships: []
+      }
       financial_transactions: {
         Row: {
           amount: number

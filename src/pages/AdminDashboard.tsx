@@ -5,6 +5,7 @@ import SummaryCard from "@/components/SummaryCard";
 import { Wallet, TrendingUp, AlertCircle, Plus, MessageSquare, Calendar, Megaphone } from "lucide-react";
 import { CreatePollDialog } from "@/components/CreatePollDialog";
 import { CreateAnnouncementDialog } from "@/components/CreateAnnouncementDialog";
+import CreateEventDialog from "@/components/CreateEventDialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,6 +19,7 @@ const AdminDashboard = () => {
   const [overdueRate, setOverdueRate] = useState(0);
   const [showCreatePoll, setShowCreatePoll] = useState(false);
   const [showCreateAnnouncement, setShowCreateAnnouncement] = useState(false);
+  const [showCreateEvent, setShowCreateEvent] = useState(false);
 
   useEffect(() => {
     document.title = "Dashboard Admin - Forma Ágil";
@@ -124,6 +126,7 @@ const AdminDashboard = () => {
               <Button
                 variant="outline"
                 className="flex flex-col h-auto py-4 gap-2"
+                onClick={() => setShowCreateEvent(true)}
               >
                 <Calendar className="h-6 w-6" />
                 <span className="text-xs">Novo Evento</span>
@@ -140,6 +143,10 @@ const AdminDashboard = () => {
       <CreateAnnouncementDialog
         open={showCreateAnnouncement}
         onOpenChange={setShowCreateAnnouncement}
+      />
+      <CreateEventDialog
+        open={showCreateEvent}
+        onOpenChange={setShowCreateEvent}
       />
 
       <BottomNavigation />
