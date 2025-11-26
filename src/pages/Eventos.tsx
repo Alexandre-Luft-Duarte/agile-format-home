@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import BottomNavigation from "@/components/BottomNavigation";
 import EventListItem from "@/components/EventListItem";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -59,6 +59,10 @@ const mockPastEvents = [
 
 const Eventos = () => {
   const [activeTab, setActiveTab] = useState("upcoming");
+
+  useEffect(() => {
+    document.title = "Eventos da Turma - Forma Ágil";
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-background/95 pb-20">

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import BottomNavigation from "@/components/BottomNavigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -39,6 +39,10 @@ const MenuItem = ({ icon: Icon, label, onClick }: MenuItemProps) => {
 const Perfil = () => {
   const [studentName] = useState("Ana Silva");
   const [studentClass] = useState("Turma 2025 - Engenharia");
+
+  useEffect(() => {
+    document.title = "Meu Perfil - Forma Ágil";
+  }, []);
 
   const getInitials = (name: string) => {
     return name
