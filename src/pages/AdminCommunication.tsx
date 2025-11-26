@@ -5,7 +5,20 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
-import { MessageSquare, X } from "lucide-react";
+import { MessageSquare, X, Trash2 } from "lucide-react";
+import CreatePollDialog from "@/components/CreatePollDialog";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface Poll {
   id: string;
@@ -63,7 +76,28 @@ const AdminCommunication = () => {
       .eq("id", pollId);
 
     if (!error) {
+      toast.success("Enquete encerrada com sucesso!");
       fetchPolls();
+    } else {
+      toast.error("Erro ao encerrar enquete");
+    }
+  };
+
+  const handleDeletePoll = async (pollId: string) => {
+    // First delete poll votes
+    await supabase.from("poll_votes").delete().eq("poll_id", pollId);
+    
+    // Then delete poll options
+    await supabase.from("poll_options").delete().eq("poll_id", pollId);
+    
+    // Finally delete the poll
+    const { error } = await supabase.from("polls").delete().eq("id", pollId);
+
+    if (!error) {
+      toast.success("Enquete excluída com sucesso!");
+      fetchPolls();
+    } else {
+      toast.error("Erro ao excluir enquete");
     }
   };
 
@@ -83,6 +117,8 @@ const AdminCommunication = () => {
       </header>
 
       <div className="max-w-md mx-auto px-4 py-6 space-y-6">
+        <CreatePollDialog onPollCreated={fetchPolls} />
+        
         {polls.length === 0 ? (
           <Card>
             <CardContent className="p-8 text-center text-muted-foreground">
@@ -145,16 +181,43 @@ const AdminCommunication = () => {
                     Total de votos: {totalVotes}
                   </div>
 
-                  {poll.status === "active" && (
-                    <Button
-                      variant="destructive"
-                      className="w-full"
-                      onClick={() => handleClosePoll(poll.id)}
-                    >
-                      <X className="h-4 w-4 mr-2" />
-                      Encerrar Votação
-                    </Button>
-                  )}
+                  <div className="flex gap-2">
+                    {poll.status === "active" && (
+                      <Button
+                        variant="destructive"
+                        className="flex-1"
+                        onClick={() => handleClosePoll(poll.id)}
+                      >
+                        <X className="h-4 w-4 mr-2" />
+                        Encerrar
+                      </Button>
+                    )}
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="outline" className="flex-1">
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Excluir
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Tem certeza que deseja excluir esta enquete? Esta ação não pode ser desfeita.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDeletePoll(poll.id)}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            Excluir
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
                 </CardContent>
               </Card>
             );

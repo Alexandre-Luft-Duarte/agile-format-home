@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Financas from "./pages/Financas";
 import Eventos from "./pages/Eventos";
 import Perfil from "./pages/Perfil";
+import Comunicacao from "./pages/Comunicacao";
 import Auth from "./pages/Auth";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminFinances from "./pages/AdminFinances";
@@ -55,6 +56,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Perfil />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/comunicacao"
+              element={
+                <ProtectedRoute>
+                  <Comunicacao />
                 </ProtectedRoute>
               }
             />
