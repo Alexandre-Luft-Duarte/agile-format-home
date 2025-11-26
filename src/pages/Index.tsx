@@ -22,8 +22,9 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
-      <header className="bg-gradient-primary text-primary-foreground px-6 py-8 rounded-b-3xl shadow-elevated">
-        <div className="max-w-md mx-auto">
+      <header className="bg-gradient-primary text-primary-foreground px-6 py-8 shadow-lg relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent"></div>
+        <div className="max-w-md mx-auto relative z-10">
           <h1 className="text-3xl font-bold mb-1">Olá, {studentName}!</h1>
           <p className="text-primary-foreground/90 text-sm">
             Bem-vindo ao Forma Ágil

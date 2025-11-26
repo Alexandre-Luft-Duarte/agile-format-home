@@ -66,11 +66,15 @@ const Eventos = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-background/95 pb-20">
-      <div className="max-w-md mx-auto px-4 py-6">
-        <h1 className="text-3xl font-bold text-foreground mb-6">
-          Eventos da Turma
-        </h1>
+      {/* Header */}
+      <header className="bg-gradient-primary text-primary-foreground px-6 py-8 shadow-lg relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent"></div>
+        <div className="max-w-md mx-auto relative z-10">
+          <h1 className="text-3xl font-bold">Eventos da Turma</h1>
+        </div>
+      </header>
 
+      <div className="max-w-md mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="w-full mb-6">
             <TabsTrigger value="upcoming" className="flex-1">
