@@ -14,16 +14,274 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      announcements: {
+        Row: {
+          content: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          title: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          title: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      financial_transactions: {
+        Row: {
+          amount: number
+          category: string | null
+          created_at: string | null
+          created_by: string | null
+          date: string
+          description: string
+          id: string
+          receipt_url: string | null
+          type: string
+        }
+        Insert: {
+          amount: number
+          category?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          date?: string
+          description: string
+          id?: string
+          receipt_url?: string | null
+          type: string
+        }
+        Update: {
+          amount?: number
+          category?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          date?: string
+          description?: string
+          id?: string
+          receipt_url?: string | null
+          type?: string
+        }
+        Relationships: []
+      }
+      poll_options: {
+        Row: {
+          created_at: string | null
+          id: string
+          option_text: string
+          poll_id: string | null
+          vote_count: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          option_text: string
+          poll_id?: string | null
+          vote_count?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          option_text?: string
+          poll_id?: string | null
+          vote_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poll_options_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      poll_votes: {
+        Row: {
+          created_at: string | null
+          id: string
+          option_id: string | null
+          poll_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          option_id?: string | null
+          poll_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          option_id?: string | null
+          poll_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poll_votes_option_id_fkey"
+            columns: ["option_id"]
+            isOneToOne: false
+            referencedRelation: "poll_options"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "poll_votes_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      polls: {
+        Row: {
+          closed_at: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          status: string
+          title: string
+        }
+        Insert: {
+          closed_at?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          status?: string
+          title: string
+        }
+        Update: {
+          closed_at?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          status?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          class_name: string | null
+          created_at: string | null
+          full_name: string
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          class_name?: string | null
+          created_at?: string | null
+          full_name: string
+          id: string
+          updated_at?: string | null
+        }
+        Update: {
+          class_name?: string | null
+          created_at?: string | null
+          full_name?: string
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      student_installments: {
+        Row: {
+          amount: number
+          created_at: string | null
+          due_date: string
+          id: string
+          installment_number: number
+          paid_date: string | null
+          payment_method: string | null
+          status: string
+          student_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          due_date: string
+          id?: string
+          installment_number: number
+          paid_date?: string | null
+          payment_method?: string | null
+          status: string
+          student_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          due_date?: string
+          id?: string
+          installment_number?: number
+          paid_date?: string | null
+          payment_method?: string | null
+          status?: string
+          student_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_installments_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "student"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +408,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "student"],
+    },
   },
 } as const
