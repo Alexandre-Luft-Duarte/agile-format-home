@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Search, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { CreateChargeDialog } from "./CreateChargeDialog";
 
 interface Student {
   id: string;
@@ -14,6 +16,7 @@ interface Student {
 const StudentControl = () => {
   const [students, setStudents] = useState<Student[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [showCreateCharge, setShowCreateCharge] = useState(false);
 
   useEffect(() => {
     fetchStudents();
@@ -52,15 +55,20 @@ const StudentControl = () => {
 
   return (
     <div className="space-y-4">
-      {/* Search Bar */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Buscar aluno..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10"
-        />
+      {/* Header with Search and Action Button */}
+      <div className="flex gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Buscar aluno..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+        <Button onClick={() => setShowCreateCharge(true)} size="icon">
+          <Plus className="h-4 w-4" />
+        </Button>
       </div>
 
       {/* Students List */}
@@ -91,6 +99,12 @@ const StudentControl = () => {
           </Card>
         ))
       )}
+
+      <CreateChargeDialog
+        open={showCreateCharge}
+        onOpenChange={setShowCreateCharge}
+        onChargeCreated={fetchStudents}
+      />
     </div>
   );
 };
