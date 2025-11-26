@@ -1,11 +1,24 @@
 import { useState, useEffect } from "react";
 import BottomNavigation from "@/components/BottomNavigation";
 import EventListItem from "@/components/EventListItem";
+import EditEventDialog from "@/components/EditEventDialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { format, isPast, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import placeholderImage from "@/assets/event-placeholder.jpg";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Event {
   id: string;
@@ -13,17 +26,39 @@ interface Event {
   date: string;
   location: string | null;
   image_url: string | null;
+  description: string | null;
 }
 
 const Eventos = () => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("upcoming");
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<Event | null>(null);
+  const [deletingEventId, setDeletingEventId] = useState<string | null>(null);
 
   useEffect(() => {
     document.title = "Eventos da Turma - Forma Ágil";
     fetchEvents();
   }, []);
+
+  useEffect(() => {
+    const checkAdminRole = async () => {
+      if (!user) return;
+
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+
+      setIsAdmin(!!data);
+    };
+
+    checkAdminRole();
+  }, [user]);
 
   const fetchEvents = async () => {
     try {
@@ -71,6 +106,27 @@ const Eventos = () => {
   const upcomingEvents = events.filter((event) => !isPast(parseISO(event.date)));
   const pastEvents = events.filter((event) => isPast(parseISO(event.date)));
 
+  const handleDeleteEvent = async (eventId: string) => {
+    const { error } = await supabase.from("events").delete().eq("id", eventId);
+
+    if (error) {
+      toast({
+        title: "Erro ao excluir evento",
+        description: error.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Evento excluído!",
+      description: "O evento foi excluído com sucesso.",
+    });
+
+    setDeletingEventId(null);
+    fetchEvents();
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-background/95 pb-20">
       {/* Header */}
@@ -107,6 +163,9 @@ const Eventos = () => {
                   date={formatEventDate(event.date)}
                   location={event.location || "Local a definir"}
                   image={event.image_url || placeholderImage}
+                  isAdmin={isAdmin}
+                  onEdit={() => setEditingEvent(event)}
+                  onDelete={() => setDeletingEventId(event.id)}
                 />
               ))
             )}
@@ -127,6 +186,9 @@ const Eventos = () => {
                   date={formatEventDate(event.date)}
                   location={event.location || "Local a definir"}
                   image={event.image_url || placeholderImage}
+                  isAdmin={isAdmin}
+                  onEdit={() => setEditingEvent(event)}
+                  onDelete={() => setDeletingEventId(event.id)}
                 />
               ))
             )}
@@ -135,6 +197,39 @@ const Eventos = () => {
       </div>
 
       <BottomNavigation />
+
+      {editingEvent && (
+        <EditEventDialog
+          open={!!editingEvent}
+          onOpenChange={(open) => !open && setEditingEvent(null)}
+          event={editingEvent}
+          onEventUpdated={fetchEvents}
+        />
+      )}
+
+      <AlertDialog
+        open={!!deletingEventId}
+        onOpenChange={(open) => !open && setDeletingEventId(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir este evento? Esta ação não pode ser
+              desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deletingEventId && handleDeleteEvent(deletingEventId)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
