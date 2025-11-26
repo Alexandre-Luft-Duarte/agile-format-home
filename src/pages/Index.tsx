@@ -1,16 +1,37 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import FinancialCard from "@/components/FinancialCard";
 import EventCard from "@/components/EventCard";
 import CommunicationsSection from "@/components/CommunicationsSection";
 import BottomNavigation from "@/components/BottomNavigation";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import eventImage from "@/assets/event-100-days.jpg";
 
 const Index = () => {
+  const { user } = useAuth();
+  const [studentName, setStudentName] = useState<string>("Usuário");
+
   useEffect(() => {
     document.title = "Início - Forma Ágil";
   }, []);
-  // Mock data - in a real app, this would come from an API or context
-  const studentName = "Maria Silva";
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", user.id)
+        .single();
+
+      if (data && !error) {
+        setStudentName(data.full_name);
+      }
+    };
+
+    fetchUserProfile();
+  }, [user]);
   const nextInstallment = "R$ 300,00";
   const outstandingBalance = "R$ 3.300,00";
   const nextEvent = {
