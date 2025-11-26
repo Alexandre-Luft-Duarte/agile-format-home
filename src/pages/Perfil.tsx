@@ -3,6 +3,7 @@ import BottomNavigation from "@/components/BottomNavigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/contexts/AuthContext";
 import { 
   User, 
   Lock, 
@@ -37,8 +38,9 @@ const MenuItem = ({ icon: Icon, label, onClick }: MenuItemProps) => {
 };
 
 const Perfil = () => {
-  const [studentName] = useState("Ana Silva");
-  const [studentClass] = useState("Turma 2025 - Engenharia");
+  const { user, signOut } = useAuth();
+  const studentName = user?.user_metadata?.full_name || "Usuário";
+  const studentClass = "Turma 2024";
 
   useEffect(() => {
     document.title = "Meu Perfil - Forma Ágil";
@@ -57,9 +59,9 @@ const Perfil = () => {
     toast.info(`Abrindo ${option}...`);
   };
 
-  const handleLogout = () => {
-    toast.success("Saindo da conta...");
-    // Logout logic will be implemented when authentication is added
+  const handleLogout = async () => {
+    await signOut();
+    toast.success("Até logo!");
   };
 
   return (
