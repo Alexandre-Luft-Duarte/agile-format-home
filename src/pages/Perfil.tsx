@@ -64,11 +64,15 @@ const Perfil = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-background/95 pb-20">
-      <div className="max-w-md mx-auto px-4 py-6">
-        <h1 className="text-3xl font-bold text-foreground mb-8">
-          Meu Perfil
-        </h1>
+      {/* Header */}
+      <header className="bg-gradient-primary text-primary-foreground px-6 py-8 shadow-lg relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent"></div>
+        <div className="max-w-md mx-auto relative z-10">
+          <h1 className="text-3xl font-bold">Meu Perfil</h1>
+        </div>
+      </header>
 
+      <div className="max-w-md mx-auto px-4 py-6">
         {/* Profile Header */}
         <div className="bg-gradient-primary rounded-2xl p-6 mb-6 shadow-card">
           <div className="flex items-center gap-4">
