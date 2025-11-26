@@ -2,7 +2,7 @@ import FinancialCard from "@/components/FinancialCard";
 import EventCard from "@/components/EventCard";
 import CommunicationsSection from "@/components/CommunicationsSection";
 import BottomNavigation from "@/components/BottomNavigation";
-import eventImage from "@/assets/event-placeholder.jpg";
+import eventImage from "@/assets/event-100-days.jpg";
 
 const Index = () => {
   // Mock data - in a real app, this would come from an API or context

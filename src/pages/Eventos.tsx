@@ -2,7 +2,12 @@ import { useState } from "react";
 import BottomNavigation from "@/components/BottomNavigation";
 import EventListItem from "@/components/EventListItem";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import eventPlaceholder from "@/assets/event-placeholder.jpg";
+import event100Days from "@/assets/event-100-days.jpg";
+import eventGala from "@/assets/event-gala.jpg";
+import eventBBQ from "@/assets/event-bbq.jpg";
+import eventTrip from "@/assets/event-trip.jpg";
+import eventReception from "@/assets/event-reception.jpg";
+import eventIntegration from "@/assets/event-integration.jpg";
 
 const mockUpcomingEvents = [
   {
@@ -10,28 +15,28 @@ const mockUpcomingEvents = [
     name: "Festa de 100 Dias",
     date: "25 de Março de 2025",
     location: "Espaço Villa da Mata",
-    image: eventPlaceholder,
+    image: event100Days,
   },
   {
     id: 2,
     name: "Baile de Gala",
     date: "15 de Maio de 2025",
     location: "Grand Hotel São Paulo",
-    image: eventPlaceholder,
+    image: eventGala,
   },
   {
     id: 3,
     name: "Churrasco da Turma",
     date: "8 de Junho de 2025",
     location: "Chácara Recanto Verde",
-    image: eventPlaceholder,
+    image: eventBBQ,
   },
   {
     id: 4,
     name: "Viagem de Formatura",
     date: "20 de Julho de 2025",
     location: "Porto Seguro, BA",
-    image: eventPlaceholder,
+    image: eventTrip,
   },
 ];
 
@@ -41,14 +46,14 @@ const mockPastEvents = [
     name: "Festa de Recepção",
     date: "10 de Fevereiro de 2025",
     location: "Clube Universitário",
-    image: eventPlaceholder,
+    image: eventReception,
   },
   {
     id: 6,
     name: "Encontro de Integração",
     date: "5 de Janeiro de 2025",
     location: "Parque da Cidade",
-    image: eventPlaceholder,
+    image: eventIntegration,
   },
 ];
 
