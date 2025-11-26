@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import BottomNavigation from "@/components/BottomNavigation";
 import SummaryCard from "@/components/SummaryCard";
-import { Wallet, TrendingUp, AlertCircle, Plus, MessageSquare, Calendar } from "lucide-react";
+import { Wallet, TrendingUp, AlertCircle, Plus, MessageSquare, Calendar, Megaphone } from "lucide-react";
+import { CreatePollDialog } from "@/components/CreatePollDialog";
+import { CreateAnnouncementDialog } from "@/components/CreateAnnouncementDialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,6 +16,8 @@ const AdminDashboard = () => {
   const [totalBalance, setTotalBalance] = useState(0);
   const [monthlyIncome, setMonthlyIncome] = useState(0);
   const [overdueRate, setOverdueRate] = useState(0);
+  const [showCreatePoll, setShowCreatePoll] = useState(false);
+  const [showCreateAnnouncement, setShowCreateAnnouncement] = useState(false);
 
   useEffect(() => {
     document.title = "Dashboard Admin - Forma Ágil";
@@ -104,7 +108,7 @@ const AdminDashboard = () => {
               <Button
                 variant="outline"
                 className="flex flex-col h-auto py-4 gap-2"
-                onClick={() => navigate("/admin/communication")}
+                onClick={() => setShowCreatePoll(true)}
               >
                 <MessageSquare className="h-6 w-6" />
                 <span className="text-xs">Nova Enquete</span>
@@ -112,9 +116,9 @@ const AdminDashboard = () => {
               <Button
                 variant="outline"
                 className="flex flex-col h-auto py-4 gap-2"
-                onClick={() => navigate("/admin/communication")}
+                onClick={() => setShowCreateAnnouncement(true)}
               >
-                <Plus className="h-6 w-6" />
+                <Megaphone className="h-6 w-6" />
                 <span className="text-xs">Novo Aviso</span>
               </Button>
               <Button
@@ -128,6 +132,15 @@ const AdminDashboard = () => {
           </CardContent>
         </Card>
       </div>
+
+      <CreatePollDialog 
+        open={showCreatePoll} 
+        onOpenChange={setShowCreatePoll}
+      />
+      <CreateAnnouncementDialog
+        open={showCreateAnnouncement}
+        onOpenChange={setShowCreateAnnouncement}
+      />
 
       <BottomNavigation />
     </div>
