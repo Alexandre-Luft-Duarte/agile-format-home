@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import BottomNavigation from "@/components/BottomNavigation";
 import SummaryCard from "@/components/SummaryCard";
 import InstallmentItem, { InstallmentStatus } from "@/components/InstallmentItem";
@@ -28,6 +29,10 @@ const mockInstallments: Installment[] = [
 const Financas = () => {
   const totalPaid = "R$ 1.500,00";
   const outstandingBalance = "R$ 3.300,00";
+
+  useEffect(() => {
+    document.title = "Minhas Finanças - Forma Ágil";
+  }, []);
 
   const handlePayClick = (installmentName: string) => {
     toast.success(`Redirecionando para pagamento da ${installmentName}`);
