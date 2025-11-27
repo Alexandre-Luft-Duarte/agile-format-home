@@ -84,8 +84,8 @@ const Auth = () => {
       <Card className="w-full max-w-md shadow-elevated">
         <CardHeader className="space-y-1 text-center">
           <div className="mb-4">
-            <div className="w-20 h-20 mx-auto bg-gradient-primary rounded-2xl flex items-center justify-center shadow-lg">
-              <span className="text-4xl font-bold text-primary-foreground">FA</span>
+            <div className="w-40 h-40 mx-auto flex items-center justify-center">
+                <img src={"../../../public/logo.png"} alt="logo"/>
             </div>
           </div>
           <CardTitle className="text-2xl font-bold">
