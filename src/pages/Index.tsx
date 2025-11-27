@@ -19,7 +19,7 @@ const Index = () => {
   } | null>(null);
 
   useEffect(() => {
-    document.title = "Início - Forma Ágil";
+    document.title = "Início - Formae";
   }, []);
 
   useEffect(() => {
@@ -77,7 +77,7 @@ const Index = () => {
         <div className="max-w-md mx-auto relative z-10">
           <h1 className="text-3xl font-bold mb-1">Olá, {studentName}!</h1>
           <p className="text-primary-foreground/90 text-sm">
-            Bem-vindo ao Forma Ágil
+            Bem-vindo ao Formae
           </p>
         </div>
       </header>

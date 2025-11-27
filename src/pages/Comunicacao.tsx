@@ -46,7 +46,7 @@ const Comunicacao = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    document.title = "Comunicação - Forma Ágil";
+    document.title = "Comunicação - Formae";
     fetchPolls();
     fetchAnnouncements();
     fetchUserVotes();

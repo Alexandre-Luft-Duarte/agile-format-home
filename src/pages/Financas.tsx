@@ -26,7 +26,7 @@ const Financas = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    document.title = "Minhas Finanças - Forma Ágil";
+    document.title = "Minhas Finanças - Formae";
     if (user) {
       fetchInstallments();
     }

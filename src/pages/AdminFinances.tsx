@@ -25,7 +25,7 @@ const AdminFinances = () => {
   const [showManualEntry, setShowManualEntry] = useState(false);
 
   useEffect(() => {
-    document.title = "Gestão Financeira - Forma Ágil";
+    document.title = "Gestão Financeira - Formae";
     fetchTransactions();
   }, []);
 

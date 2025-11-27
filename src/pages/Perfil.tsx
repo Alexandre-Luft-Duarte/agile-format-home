@@ -43,7 +43,7 @@ const Perfil = () => {
   const studentClass = "Turma 2024";
 
   useEffect(() => {
-    document.title = "Meu Perfil - Forma Ágil";
+    document.title = "Meu Perfil - Formae";
   }, []);
 
   const getInitials = (name: string) => {

@@ -41,7 +41,7 @@ const AdminCommunication = () => {
   const [showCreatePoll, setShowCreatePoll] = useState(false);
 
   useEffect(() => {
-    document.title = "Gestão de Comunicação - Forma Ágil";
+    document.title = "Gestão de Comunicação - Formae";
     fetchPolls();
   }, []);
 

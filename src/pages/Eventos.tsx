@@ -39,7 +39,7 @@ const Eventos = () => {
   const [deletingEventId, setDeletingEventId] = useState<string | null>(null);
 
   useEffect(() => {
-    document.title = "Eventos da Turma - Forma Ágil";
+    document.title = "Eventos da Turma - Formae";
     fetchEvents();
   }, []);
 

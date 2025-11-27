@@ -21,7 +21,7 @@ const Auth = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    document.title = "Login - Forma Ágil";
+    document.title = "Login - Formae";
   }, []);
 
   useEffect(() => {
@@ -85,7 +85,7 @@ const Auth = () => {
         <CardHeader className="space-y-1 text-center">
           <div className="mb-4">
             <div className="w-40 h-40 mx-auto flex items-center justify-center">
-                <img src={"../../../public/logo.png"} alt="logo"/>
+                <img src={"/logo.png"} alt="logo"/>
             </div>
           </div>
           <CardTitle className="text-2xl font-bold">

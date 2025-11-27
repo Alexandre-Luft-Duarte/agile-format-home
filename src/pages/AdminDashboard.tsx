@@ -22,7 +22,7 @@ const AdminDashboard = () => {
   const [showCreateEvent, setShowCreateEvent] = useState(false);
 
   useEffect(() => {
-    document.title = "Dashboard Admin - Forma Ágil";
+    document.title = "Dashboard Admin - Formae";
     fetchFinancialData();
   }, []);
 
@@ -65,7 +65,7 @@ const AdminDashboard = () => {
         <div className="max-w-md mx-auto relative z-10">
           <h1 className="text-3xl font-bold mb-1">Dashboard da Comissão</h1>
           <p className="text-primary-foreground/90 text-sm">
-            Gestão Forma Ágil
+            Gestão Formae
           </p>
         </div>
       </header>
