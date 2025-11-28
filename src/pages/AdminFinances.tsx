@@ -3,8 +3,9 @@ import BottomNavigation from "@/components/BottomNavigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, TrendingUp, TrendingDown } from "lucide-react";
+import { Plus, TrendingUp, TrendingDown, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import ManualEntryDialog from "@/components/ManualEntryDialog";
@@ -40,6 +41,20 @@ const AdminFinances = () => {
     }
   };
 
+  const handleDelete = async (transactionId: string) => {
+    const { error } = await supabase
+      .from("financial_transactions")
+      .delete()
+      .eq("id", transactionId);
+
+    if (error) {
+      toast.error("Erro ao excluir lançamento");
+    } else {
+      toast.success("Lançamento excluído com sucesso");
+      fetchTransactions();
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
@@ -72,8 +87,8 @@ const AdminFinances = () => {
               transactions.map((transaction) => (
                 <Card key={transaction.id} className="shadow-card">
                   <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3 flex-1">
                         <div
                           className={`p-3 rounded-lg ${
                             transaction.type === "income"
@@ -87,7 +102,7 @@ const AdminFinances = () => {
                             <TrendingDown className="h-5 w-5 text-destructive" />
                           )}
                         </div>
-                        <div>
+                        <div className="flex-1">
                           <p className="font-medium">{transaction.description}</p>
                           <p className="text-xs text-muted-foreground">
                             {format(new Date(transaction.date), "dd 'de' MMMM", {
@@ -96,22 +111,32 @@ const AdminFinances = () => {
                           </p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p
-                          className={`font-bold ${
-                            transaction.type === "income"
-                              ? "text-accent-foreground"
-                              : "text-destructive"
-                          }`}
+                      <div className="flex items-center gap-3">
+                        <div className="text-right">
+                          <p
+                            className={`font-bold ${
+                              transaction.type === "income"
+                                ? "text-accent-foreground"
+                                : "text-destructive"
+                            }`}
+                          >
+                            {transaction.type === "income" ? "+" : "-"} R${" "}
+                            {Number(transaction.amount).toLocaleString("pt-BR", {
+                              minimumFractionDigits: 2,
+                            })}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {transaction.type === "income" ? "Entrada" : "Saída"}
+                          </p>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDelete(transaction.id)}
+                          className="h-8 w-8 text-destructive hover:bg-destructive/10"
                         >
-                          {transaction.type === "income" ? "+" : "-"} R${" "}
-                          {Number(transaction.amount).toLocaleString("pt-BR", {
-                            minimumFractionDigits: 2,
-                          })}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {transaction.type === "income" ? "Entrada" : "Saída"}
-                        </p>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
                   </CardContent>
