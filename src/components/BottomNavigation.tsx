@@ -38,6 +38,7 @@ const BottomNavigation = () => {
               <NavLink
                 key={item.id}
                 to={item.href}
+                end
                 className="flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-lg transition-colors"
                 activeClassName="text-primary bg-primary/10"
               >
