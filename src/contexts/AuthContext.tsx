@@ -9,7 +9,14 @@ interface AuthContextType {
   userRole: "admin" | "student" | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signUp: (email: string, password: string, fullName: string, role?: "admin" | "student") => Promise<{ error: any }>;
+  signUp: (
+    email: string, 
+    password: string, 
+    fullName: string, 
+    role?: "admin" | "student",
+    classCode?: string,
+    className?: string
+  ) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
 }
 
@@ -76,21 +83,73 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return { error };
   };
 
-  const signUp = async (email: string, password: string, fullName: string, role: "admin" | "student" = "student") => {
+  const signUp = async (
+    email: string, 
+    password: string, 
+    fullName: string, 
+    role: "admin" | "student" = "student",
+    classCode?: string,
+    className?: string
+  ) => {
     const redirectUrl = `${window.location.origin}/`;
     
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: redirectUrl,
-        data: {
-          full_name: fullName,
-          role: role,
+    // First, create or validate class
+    let finalClassId: string | null = null;
+    
+    if (role === "admin" && className) {
+      // Admin creating a new class
+      const code = await supabase.rpc('generate_class_code');
+      if (code.error) {
+        return { error: code.error };
+      }
+      
+      // We'll need to create the class after user is created
+      // Store in metadata for now
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: {
+            full_name: fullName,
+            role: role,
+            class_name: className,
+            class_code: code.data,
+            create_class: true,
+          },
         },
-      },
-    });
-    return { error };
+      });
+      return { error };
+    } else if (classCode) {
+      // Join existing class by code
+      const { data: classData, error: classError } = await supabase
+        .from('classes')
+        .select('id')
+        .eq('code', classCode.toUpperCase())
+        .single();
+      
+      if (classError || !classData) {
+        return { error: { message: 'Código de turma inválido' } };
+      }
+      
+      finalClassId = classData.id;
+      
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: {
+            full_name: fullName,
+            role: role,
+            class_id: finalClassId,
+          },
+        },
+      });
+      return { error };
+    } else {
+      return { error: { message: 'É necessário informar um código de turma ou criar uma nova turma' } };
+    }
   };
 
   const signOut = async () => {
