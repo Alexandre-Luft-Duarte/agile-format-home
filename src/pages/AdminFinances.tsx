@@ -10,6 +10,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import ManualEntryDialog from "@/components/ManualEntryDialog";
 import StudentControl from "@/components/StudentControl";
+import BankIntegration from "@/components/BankIntegration";
 
 interface Transaction {
   id: string;
@@ -67,12 +68,15 @@ const AdminFinances = () => {
 
       <div className="max-w-md mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="w-full mb-6">
-            <TabsTrigger value="statement" className="flex-1">
-              Extrato Geral
+          <TabsList className="w-full mb-6 grid grid-cols-3">
+            <TabsTrigger value="statement">
+              Extrato
             </TabsTrigger>
-            <TabsTrigger value="students" className="flex-1">
-              Controle de Alunos
+            <TabsTrigger value="students">
+              Alunos
+            </TabsTrigger>
+            <TabsTrigger value="bank">
+              Banco
             </TabsTrigger>
           </TabsList>
 
@@ -147,6 +151,10 @@ const AdminFinances = () => {
 
           <TabsContent value="students">
             <StudentControl />
+          </TabsContent>
+
+          <TabsContent value="bank">
+            <BankIntegration />
           </TabsContent>
         </Tabs>
 
