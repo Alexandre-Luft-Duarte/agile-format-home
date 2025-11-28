@@ -16,6 +16,9 @@ const Auth = () => {
   const [selectedRole, setSelectedRole] = useState<"student" | "admin">("student");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [classOption, setClassOption] = useState<"create" | "join">("join");
+  const [className, setClassName] = useState("");
+  const [classCode, setClassCode] = useState("");
   const { signIn, signUp, user, userRole } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -48,6 +51,29 @@ const Auth = () => {
       return;
     }
 
+    // Validate class fields for signup
+    if (!isLogin) {
+      if (selectedRole === "admin" && classOption === "create" && !className) {
+        toast({
+          title: "Erro",
+          description: "Por favor, informe o nome da turma",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+      
+      if ((selectedRole === "student" || classOption === "join") && !classCode) {
+        toast({
+          title: "Erro",
+          description: "Por favor, informe o código da turma",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+    }
+
     if (isLogin) {
       const { error } = await signIn(email, password);
       if (error) {
@@ -60,7 +86,14 @@ const Auth = () => {
         });
       }
     } else {
-      const { error } = await signUp(email, password, fullName, selectedRole);
+      const { error } = await signUp(
+        email, 
+        password, 
+        fullName, 
+        selectedRole,
+        classOption === "join" ? classCode : undefined,
+        classOption === "create" ? className : undefined
+      );
       if (error) {
         toast({
           title: "Erro ao cadastrar",
@@ -68,10 +101,17 @@ const Auth = () => {
           variant: "destructive",
         });
       } else {
-        toast({
-          title: "Cadastro realizado!",
-          description: "Você já pode fazer login",
-        });
+        if (selectedRole === "admin" && classOption === "create") {
+          toast({
+            title: "Turma criada com sucesso!",
+            description: "Você já pode fazer login. Compartilhe o código da turma com outros membros.",
+          });
+        } else {
+          toast({
+            title: "Cadastro realizado!",
+            description: "Você já pode fazer login",
+          });
+        }
         setIsLogin(true);
       }
     }
@@ -125,6 +165,71 @@ const Auth = () => {
                     <option value="admin">Membro da Comissão</option>
                   </select>
                 </div>
+
+                {selectedRole === "admin" && (
+                  <div className="space-y-2">
+                    <Label>Opção de Turma</Label>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setClassOption("create")}
+                        className={`flex-1 px-3 py-2 border rounded-md transition-colors ${
+                          classOption === "create"
+                            ? "bg-primary text-primary-foreground border-primary"
+                            : "bg-background border-input hover:border-primary"
+                        }`}
+                      >
+                        Criar Nova Turma
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setClassOption("join")}
+                        className={`flex-1 px-3 py-2 border rounded-md transition-colors ${
+                          classOption === "join"
+                            ? "bg-primary text-primary-foreground border-primary"
+                            : "bg-background border-input hover:border-primary"
+                        }`}
+                      >
+                        Entrar em Turma
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {selectedRole === "admin" && classOption === "create" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="className">Nome da Turma</Label>
+                    <Input
+                      id="className"
+                      type="text"
+                      placeholder="Ex: Turma 2025"
+                      value={className}
+                      onChange={(e) => setClassName(e.target.value)}
+                      required
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Um código único será gerado automaticamente para sua turma
+                    </p>
+                  </div>
+                )}
+
+                {(selectedRole === "student" || (selectedRole === "admin" && classOption === "join")) && (
+                  <div className="space-y-2">
+                    <Label htmlFor="classCode">Código da Turma</Label>
+                    <Input
+                      id="classCode"
+                      type="text"
+                      placeholder="Digite o código"
+                      value={classCode}
+                      onChange={(e) => setClassCode(e.target.value.toUpperCase())}
+                      maxLength={6}
+                      required
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Solicite o código com um membro da comissão
+                    </p>
+                  </div>
+                )}
               </>
             )}
             

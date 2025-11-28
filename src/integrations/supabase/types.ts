@@ -38,6 +38,30 @@ export type Database = {
         }
         Relationships: []
       }
+      classes: {
+        Row: {
+          code: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       events: {
         Row: {
           created_at: string | null
@@ -213,6 +237,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          class_id: string | null
           class_name: string | null
           created_at: string | null
           full_name: string
@@ -220,6 +245,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          class_id?: string | null
           class_name?: string | null
           created_at?: string | null
           full_name: string
@@ -227,13 +253,22 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          class_id?: string | null
           class_name?: string | null
           created_at?: string | null
           full_name?: string
           id?: string
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       student_installments: {
         Row: {
@@ -308,6 +343,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_class_code: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
