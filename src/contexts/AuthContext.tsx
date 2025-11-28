@@ -126,7 +126,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         .from('classes')
         .select('id')
         .eq('code', classCode.toUpperCase())
-        .single();
+        .maybeSingle();
       
       if (classError || !classData) {
         return { error: { message: 'Código de turma inválido' } };
