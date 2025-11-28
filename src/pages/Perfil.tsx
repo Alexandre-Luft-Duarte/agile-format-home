@@ -49,24 +49,43 @@ const Perfil = () => {
     
     // Fetch class info for admin users
     const fetchClassInfo = async () => {
-      if (!user || userRole !== 'admin') return;
+      console.log('🔍 Debug - userRole:', userRole);
+      console.log('🔍 Debug - user:', user);
       
-      const { data: profile } = await supabase
+      if (!user || userRole !== 'admin') {
+        console.log('❌ Não é admin ou não tem usuário');
+        return;
+      }
+      
+      console.log('✅ Usuário é admin, buscando profile...');
+      
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('class_id')
         .eq('id', user.id)
         .single();
       
+      console.log('📋 Profile data:', profile);
+      console.log('📋 Profile error:', profileError);
+      
       if (profile?.class_id) {
-        const { data: classData } = await supabase
+        console.log('✅ class_id encontrado:', profile.class_id);
+        
+        const { data: classData, error: classError } = await supabase
           .from('classes')
           .select('name, code')
           .eq('id', profile.class_id)
           .single();
         
+        console.log('🏫 Class data:', classData);
+        console.log('🏫 Class error:', classError);
+        
         if (classData) {
           setClassInfo(classData);
+          console.log('✅ classInfo setado:', classData);
         }
+      } else {
+        console.log('❌ class_id não encontrado no profile');
       }
     };
     
