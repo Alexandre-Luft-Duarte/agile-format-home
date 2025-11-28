@@ -158,14 +158,16 @@ const AdminFinances = () => {
           </TabsContent>
         </Tabs>
 
-        {/* Floating Action Button */}
-        <Button
-          size="icon"
-          className="fixed bottom-24 right-6 h-14 w-14 rounded-full shadow-elevated z-40"
-          onClick={() => setShowManualEntry(true)}
-        >
-          <Plus className="h-6 w-6" />
-        </Button>
+        {/* Floating Action Button - Only on statement tab */}
+        {activeTab === "statement" && (
+          <Button
+            size="icon"
+            className="fixed bottom-24 right-6 h-14 w-14 rounded-full shadow-elevated z-40"
+            onClick={() => setShowManualEntry(true)}
+          >
+            <Plus className="h-6 w-6" />
+          </Button>
+        )}
 
         <ManualEntryDialog
           open={showManualEntry}
