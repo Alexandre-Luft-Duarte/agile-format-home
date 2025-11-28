@@ -4,13 +4,15 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { 
   User, 
   Lock, 
   Bell, 
   HelpCircle, 
   ChevronRight,
-  LogOut 
+  LogOut,
+  Copy
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -38,13 +40,38 @@ const MenuItem = ({ icon: Icon, label, onClick }: MenuItemProps) => {
 };
 
 const Perfil = () => {
-  const { user, signOut } = useAuth();
+  const { user, signOut, userRole } = useAuth();
   const studentName = user?.user_metadata?.full_name || "Usuário";
-  const studentClass = "Turma 2024";
+  const [classInfo, setClassInfo] = useState<{ name: string; code: string } | null>(null);
 
   useEffect(() => {
     document.title = "Meu Perfil - Formae";
-  }, []);
+    
+    // Fetch class info for admin users
+    const fetchClassInfo = async () => {
+      if (!user || userRole !== 'admin') return;
+      
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('class_id')
+        .eq('id', user.id)
+        .single();
+      
+      if (profile?.class_id) {
+        const { data: classData } = await supabase
+          .from('classes')
+          .select('name, code')
+          .eq('id', profile.class_id)
+          .single();
+        
+        if (classData) {
+          setClassInfo(classData);
+        }
+      }
+    };
+    
+    fetchClassInfo();
+  }, [user, userRole]);
 
   const getInitials = (name: string) => {
     return name
@@ -62,6 +89,13 @@ const Perfil = () => {
   const handleLogout = async () => {
     await signOut();
     toast.success("Até logo!");
+  };
+
+  const handleCopyCode = () => {
+    if (classInfo?.code) {
+      navigator.clipboard.writeText(classInfo.code);
+      toast.success("Código copiado!");
+    }
   };
 
   return (
@@ -88,10 +122,37 @@ const Perfil = () => {
               <h2 className="text-2xl font-bold text-white mb-1">
                 {studentName}
               </h2>
-              <p className="text-white/90 text-sm">{studentClass}</p>
+              <p className="text-white/90 text-sm">{classInfo?.name || "Turma 2024"}</p>
             </div>
           </div>
         </div>
+
+        {/* Class Code Section (Admin Only) */}
+        {userRole === 'admin' && classInfo && (
+          <div className="bg-card rounded-2xl shadow-card p-6 mb-6">
+            <h3 className="text-lg font-semibold text-foreground mb-2">
+              Código da Turma
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Compartilhe este código com os alunos para que possam se cadastrar na turma
+            </p>
+            <div className="flex items-center gap-3">
+              <div className="flex-1 bg-accent/10 rounded-lg px-4 py-3">
+                <p className="text-2xl font-bold text-primary tracking-wider">
+                  {classInfo.code}
+                </p>
+              </div>
+              <Button
+                onClick={handleCopyCode}
+                variant="outline"
+                size="icon"
+                className="h-12 w-12"
+              >
+                <Copy className="h-5 w-5" />
+              </Button>
+            </div>
+          </div>
+        )}
 
         {/* Menu Options */}
         <div className="bg-card rounded-2xl shadow-card overflow-hidden mb-6">
