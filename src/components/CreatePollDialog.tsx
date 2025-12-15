@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, X } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 interface CreatePollDialogProps {
@@ -53,46 +52,15 @@ export const CreatePollDialog = ({ open, onOpenChange }: CreatePollDialogProps) 
 
     setLoading(true);
 
-    try {
-      const { data: userData } = await supabase.auth.getUser();
-      
-      // Create poll
-      const { data: poll, error: pollError } = await supabase
-        .from("polls")
-        .insert({
-          title: title.trim(),
-          description: description.trim() || null,
-          status: "active",
-          created_by: userData.user?.id,
-        })
-        .select()
-        .single();
-
-      if (pollError) throw pollError;
-
-      // Create poll options
-      const { error: optionsError } = await supabase
-        .from("poll_options")
-        .insert(
-          validOptions.map(opt => ({
-            poll_id: poll.id,
-            option_text: opt.trim(),
-          }))
-        );
-
-      if (optionsError) throw optionsError;
-
+    // Mock creation
+    setTimeout(() => {
       toast.success("Enquete criada com sucesso!");
       setTitle("");
       setDescription("");
       setOptions(["", ""]);
       onOpenChange(false);
-    } catch (error) {
-      console.error("Error creating poll:", error);
-      toast.error("Erro ao criar enquete");
-    } finally {
       setLoading(false);
-    }
+    }, 500);
   };
 
   return (

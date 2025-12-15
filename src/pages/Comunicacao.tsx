@@ -5,119 +5,42 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { supabase } from "@/integrations/supabase/client";
 import { MessageSquare, CheckCircle2, Bell } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
-interface Poll {
-  id: string;
-  title: string;
-  description: string | null;
-  status: "active" | "closed";
-  created_at: string;
-}
-
-interface PollOption {
-  id: string;
-  poll_id: string;
-  option_text: string;
-  vote_count: number;
-}
-
-interface Announcement {
-  id: string;
-  title: string;
-  content: string;
-  created_at: string;
-}
-
-interface UserVote {
-  poll_id: string;
-  option_id: string;
-}
-
 const Comunicacao = () => {
-  const [polls, setPolls] = useState<Poll[]>([]);
-  const [pollOptions, setPollOptions] = useState<Record<string, PollOption[]>>({});
-  const [userVotes, setUserVotes] = useState<UserVote[]>([]);
-  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(false);
+
+  // Mock data for screenshots
+  const [polls] = useState([
+    { id: "1", title: "Tema da Festa de 100 Dias", description: "Vote no tema preferido!", status: "active", created_at: "2024-12-01" },
+    { id: "2", title: "Local do Churrasco", description: "Qual local vocês preferem?", status: "active", created_at: "2024-11-28" },
+  ]);
+
+  const [pollOptions] = useState<Record<string, Array<{ id: string; option_text: string; vote_count: number }>>>({
+    "1": [
+      { id: "1a", option_text: "Anos 80", vote_count: 15 },
+      { id: "1b", option_text: "Hollywood", vote_count: 22 },
+      { id: "1c", option_text: "Tropical", vote_count: 8 },
+    ],
+    "2": [
+      { id: "2a", option_text: "Sítio do João", vote_count: 18 },
+      { id: "2b", option_text: "Chácara Verde", vote_count: 12 },
+    ],
+  });
+
+  const [userVotes] = useState([{ poll_id: "1", option_id: "1b" }]); // User voted for Hollywood
+
+  const [announcements] = useState([
+    { id: "1", title: "Reunião da Comissão", content: "Haverá reunião da comissão no dia 15/12 às 19h na sala de estudos.", created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() },
+    { id: "2", title: "Pagamento de Parcelas", content: "Lembrete: as parcelas de dezembro vencem dia 20. Não esqueçam!", created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString() },
+  ]);
 
   useEffect(() => {
     document.title = "Comunicação - Formae";
-    fetchPolls();
-    fetchAnnouncements();
-    fetchUserVotes();
   }, []);
-
-  const fetchPolls = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("polls")
-        .select("id, title, description, status, created_at")
-        .eq("status", "active")
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-      
-      if (data) {
-        setPolls(data as Poll[]);
-        
-        // Fetch options for each poll
-        const optionsPromises = data.map(poll =>
-          supabase
-            .from("poll_options")
-            .select("*")
-            .eq("poll_id", poll.id)
-            .order("created_at")
-        );
-        
-        const optionsResults = await Promise.all(optionsPromises);
-        const optionsMap: Record<string, PollOption[]> = {};
-        
-        data.forEach((poll, index) => {
-          optionsMap[poll.id] = optionsResults[index].data || [];
-        });
-        
-        setPollOptions(optionsMap);
-      }
-    } catch (error) {
-      console.error("Error fetching polls:", error);
-      toast.error("Erro ao carregar enquetes");
-    }
-  };
-
-  const fetchAnnouncements = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("announcements")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(10);
-
-      if (error) throw error;
-      setAnnouncements(data || []);
-    } catch (error) {
-      console.error("Error fetching announcements:", error);
-      toast.error("Erro ao carregar avisos");
-    }
-  };
-
-  const fetchUserVotes = async () => {
-    const { data: userData } = await supabase.auth.getUser();
-    if (!userData.user) return;
-
-    const { data: votes } = await supabase
-      .from("poll_votes")
-      .select("poll_id, option_id")
-      .eq("user_id", userData.user.id);
-
-    if (votes) {
-      setUserVotes(votes as UserVote[]);
-    }
-  };
 
   const hasVoted = (pollId: string) => {
     return userVotes.some(vote => vote.poll_id === pollId);
@@ -127,34 +50,12 @@ const Comunicacao = () => {
     return userVotes.find(vote => vote.poll_id === pollId)?.option_id;
   };
 
-  const handleVote = async (pollId: string, optionId: string) => {
+  const handleVote = (pollId: string, optionId: string) => {
     if (hasVoted(pollId)) {
       toast.error("Você já votou nesta enquete");
       return;
     }
-
-    setLoading(true);
-
-    try {
-      const { data: userData } = await supabase.auth.getUser();
-      
-      const { error } = await supabase.from("poll_votes").insert({
-        poll_id: pollId,
-        option_id: optionId,
-        user_id: userData.user?.id,
-      });
-
-      if (error) throw error;
-
-      toast.success("Voto registrado com sucesso!");
-      await fetchPolls();
-      await fetchUserVotes();
-    } catch (error) {
-      console.error("Error voting:", error);
-      toast.error("Erro ao registrar voto");
-    } finally {
-      setLoading(false);
-    }
+    toast.success("Voto registrado com sucesso!");
   };
 
   const getTotalVotes = (pollId: string) => {

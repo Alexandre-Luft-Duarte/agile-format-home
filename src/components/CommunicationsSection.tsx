@@ -1,55 +1,19 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Bell, MessageSquare } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 
-interface Poll {
-  id: string;
-  title: string;
-  created_at: string;
-}
-
-interface Announcement {
-  id: string;
-  title: string;
-  created_at: string;
-}
-
 const CommunicationsSection = () => {
-  const [polls, setPolls] = useState<Poll[]>([]);
-  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchRecentPolls();
-    fetchRecentAnnouncements();
-  }, []);
+  // Mock data for screenshots
+  const [polls] = useState([
+    { id: "1", title: "Tema da Festa de 100 Dias", created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() },
+  ]);
 
-  const fetchRecentPolls = async () => {
-    const { data } = await supabase
-      .from("polls")
-      .select("id, title, created_at")
-      .eq("status", "active")
-      .order("created_at", { ascending: false })
-      .limit(2);
-
-    if (data) {
-      setPolls(data as Poll[]);
-    }
-  };
-
-  const fetchRecentAnnouncements = async () => {
-    const { data } = await supabase
-      .from("announcements")
-      .select("id, title, created_at")
-      .order("created_at", { ascending: false })
-      .limit(2);
-
-    if (data) {
-      setAnnouncements(data as Announcement[]);
-    }
-  };
+  const [announcements] = useState([
+    { id: "1", title: "Reunião da Comissão - 15/12", created_at: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString() },
+  ]);
 
   const getRelativeTime = (date: string) => {
     const now = new Date();
