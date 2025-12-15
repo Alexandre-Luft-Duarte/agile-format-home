@@ -1,73 +1,27 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import FinancialCard from "@/components/FinancialCard";
 import EventCard from "@/components/EventCard";
 import CommunicationsSection from "@/components/CommunicationsSection";
 import BottomNavigation from "@/components/BottomNavigation";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
-import { format, isFuture, parseISO } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import eventPlaceholder from "@/assets/event-placeholder.jpg";
 
 const Index = () => {
   const { user } = useAuth();
-  const [studentName, setStudentName] = useState<string>("Usuário");
-  const [nextEvent, setNextEvent] = useState<{
-    name: string;
-    date: string;
-    image: string;
-  } | null>(null);
+  const studentName = user?.user_metadata?.full_name || "Usuário";
 
   useEffect(() => {
     document.title = "Início - Formae";
   }, []);
 
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-      if (!user) return;
-
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("full_name")
-        .eq("id", user.id)
-        .single();
-
-      if (data && !error) {
-        setStudentName(data.full_name);
-      }
-    };
-
-    fetchUserProfile();
-  }, [user]);
-
-  useEffect(() => {
-    const fetchNextEvent = async () => {
-      const { data, error } = await supabase
-        .from("events")
-        .select("*")
-        .order("date", { ascending: true });
-
-      if (data && !error) {
-        const upcomingEvents = data.filter((event) =>
-          isFuture(parseISO(event.date))
-        );
-
-        if (upcomingEvents.length > 0) {
-          const event = upcomingEvents[0];
-          setNextEvent({
-            name: event.title,
-            date: format(parseISO(event.date), "d 'de' MMMM", { locale: ptBR }),
-            image: event.image_url || eventPlaceholder,
-          });
-        }
-      }
-    };
-
-    fetchNextEvent();
-  }, []);
-
+  // Mock data for screenshots
   const nextInstallment = "R$ 300,00";
   const outstandingBalance = "R$ 3.300,00";
+  const nextEvent = {
+    name: "Festa de 100 Dias",
+    date: "15 de Janeiro",
+    image: eventPlaceholder,
+  };
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -91,13 +45,11 @@ const Index = () => {
         />
 
         {/* Event Card */}
-        {nextEvent && (
-          <EventCard
-            eventName={nextEvent.name}
-            eventDate={nextEvent.date}
-            eventImage={nextEvent.image}
-          />
-        )}
+        <EventCard
+          eventName={nextEvent.name}
+          eventDate={nextEvent.date}
+          eventImage={nextEvent.image}
+        />
 
         {/* Communications Section */}
         <CommunicationsSection />

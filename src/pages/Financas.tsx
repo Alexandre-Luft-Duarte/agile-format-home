@@ -4,103 +4,32 @@ import SummaryCard from "@/components/SummaryCard";
 import InstallmentItem, { InstallmentStatus } from "@/components/InstallmentItem";
 import { CheckCircle2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-
-interface Installment {
-  id: string;
-  installment_number: number;
-  amount: number;
-  due_date: string;
-  status: string;
-  paid_date?: string;
-}
 
 const Financas = () => {
-  const { user } = useAuth();
-  const [installments, setInstallments] = useState<Installment[]>([]);
-  const [totalPaid, setTotalPaid] = useState(0);
-  const [outstandingBalance, setOutstandingBalance] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
+  // Mock data for screenshots
+  const [installments] = useState([
+    { id: "1", installment_number: 1, amount: 300, due_date: "2024-01-15", status: "paid" },
+    { id: "2", installment_number: 2, amount: 300, due_date: "2024-02-15", status: "paid" },
+    { id: "3", installment_number: 3, amount: 300, due_date: "2024-03-15", status: "paid" },
+    { id: "4", installment_number: 4, amount: 300, due_date: "2024-04-15", status: "open" },
+    { id: "5", installment_number: 5, amount: 300, due_date: "2024-05-15", status: "open" },
+    { id: "6", installment_number: 6, amount: 300, due_date: "2024-06-15", status: "overdue" },
+  ]);
+
+  const totalPaid = 900;
+  const outstandingBalance = 900;
 
   useEffect(() => {
     document.title = "Minhas Finanças - Formae";
-    if (user) {
-      fetchInstallments();
-    }
-  }, [user]);
+  }, []);
 
-  const fetchInstallments = async () => {
-    if (!user) return;
-
-    const { data } = await supabase
-      .from("student_installments")
-      .select("*")
-      .eq("student_id", user.id)
-      .order("due_date");
-
-    if (data) {
-      setInstallments(data);
-      
-      const paid = data
-        .filter(i => i.status === "paid")
-        .reduce((sum, i) => sum + Number(i.amount), 0);
-      
-      const outstanding = data
-        .filter(i => i.status !== "paid")
-        .reduce((sum, i) => sum + Number(i.amount), 0);
-
-      setTotalPaid(paid);
-      setOutstandingBalance(outstanding);
-    }
+  const handlePayClick = () => {
+    toast.success("Pagamento realizado com sucesso!");
   };
 
-  const handlePayClick = async (installment: Installment) => {
-    if (!user) return;
-    
-    setIsLoading(true);
-
-    try {
-      // Update installment status
-      const { error: updateError } = await supabase
-        .from("student_installments")
-        .update({
-          status: "paid",
-          paid_date: new Date().toISOString().split('T')[0],
-          payment_method: "online"
-        })
-        .eq("id", installment.id);
-
-      if (updateError) throw updateError;
-
-      // Create financial transaction
-      const { error: transactionError } = await supabase
-        .from("financial_transactions")
-        .insert({
-          type: "income",
-          description: `Parcela ${installment.installment_number} - Pagamento`,
-          amount: installment.amount,
-          date: new Date().toISOString().split('T')[0],
-          category: "Mensalidade",
-          created_by: user.id
-        });
-
-      if (transactionError) throw transactionError;
-
-      toast.success("Pagamento realizado com sucesso!");
-      fetchInstallments();
-    } catch (error) {
-      console.error("Error processing payment:", error);
-      toast.error("Erro ao processar pagamento");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const getInstallmentStatus = (status: string): InstallmentStatus => {
-    return status as InstallmentStatus;
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("pt-BR");
   };
 
   return (
@@ -135,24 +64,18 @@ const Financas = () => {
         <div className="space-y-4">
           <h2 className="text-xl font-bold text-foreground">Minhas Parcelas</h2>
 
-          {installments.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">
-              Nenhuma cobrança cadastrada ainda
-            </p>
-          ) : (
-            <div className="space-y-3">
-              {installments.map((installment) => (
-                <InstallmentItem
-                  key={installment.id}
-                  name={`Parcela ${installment.installment_number}`}
-                  dueDate={format(new Date(installment.due_date), "dd/MM/yyyy", { locale: ptBR })}
-                  amount={`R$ ${Number(installment.amount).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`}
-                  status={getInstallmentStatus(installment.status)}
-                  onPayClick={() => handlePayClick(installment)}
-                />
-              ))}
-            </div>
-          )}
+          <div className="space-y-3">
+            {installments.map((installment) => (
+              <InstallmentItem
+                key={installment.id}
+                name={`Parcela ${installment.installment_number}`}
+                dueDate={formatDate(installment.due_date)}
+                amount={`R$ ${Number(installment.amount).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`}
+                status={installment.status as InstallmentStatus}
+                onPayClick={handlePayClick}
+              />
+            ))}
+          </div>
         </div>
       </main>
 

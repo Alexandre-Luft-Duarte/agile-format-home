@@ -1,10 +1,9 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Search, Plus } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { CreateChargeDialog } from "./CreateChargeDialog";
 
 interface Student {
@@ -14,44 +13,28 @@ interface Student {
 }
 
 const StudentControl = () => {
-  const [students, setStudents] = useState<Student[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [showCreateCharge, setShowCreateCharge] = useState(false);
 
-  useEffect(() => {
-    fetchStudents();
-  }, []);
-
-  const fetchStudents = async () => {
-    const { data: profiles } = await supabase
-      .from("profiles")
-      .select("id, full_name");
-
-    if (profiles) {
-      const studentsWithStatus = await Promise.all(
-        profiles.map(async (profile) => {
-          const { data: installments } = await supabase
-            .from("student_installments")
-            .select("status")
-            .eq("student_id", profile.id);
-
-          const hasOverdue = installments?.some((i) => i.status === "overdue");
-          
-          return {
-            id: profile.id,
-            full_name: profile.full_name,
-            status: hasOverdue ? "overdue" : "paid",
-          } as Student;
-        })
-      );
-
-      setStudents(studentsWithStatus);
-    }
-  };
+  // Mock data for screenshots
+  const [students] = useState<Student[]>([
+    { id: "1", full_name: "João Silva", status: "paid" },
+    { id: "2", full_name: "Maria Santos", status: "paid" },
+    { id: "3", full_name: "Pedro Oliveira", status: "overdue" },
+    { id: "4", full_name: "Ana Costa", status: "paid" },
+    { id: "5", full_name: "Lucas Ferreira", status: "overdue" },
+    { id: "6", full_name: "Juliana Lima", status: "paid" },
+    { id: "7", full_name: "Rafael Souza", status: "paid" },
+    { id: "8", full_name: "Camila Rodrigues", status: "overdue" },
+  ]);
 
   const filteredStudents = students.filter((student) =>
     student.full_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleChargeCreated = () => {
+    // Mock function
+  };
 
   return (
     <div className="space-y-4">
@@ -103,7 +86,7 @@ const StudentControl = () => {
       <CreateChargeDialog
         open={showCreateCharge}
         onOpenChange={setShowCreateCharge}
-        onChargeCreated={fetchStudents}
+        onChargeCreated={handleChargeCreated}
       />
     </div>
   );

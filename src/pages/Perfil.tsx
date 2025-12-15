@@ -4,7 +4,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
 import { 
   User, 
   Lock, 
@@ -42,36 +41,14 @@ const MenuItem = ({ icon: Icon, label, onClick }: MenuItemProps) => {
 const Perfil = () => {
   const { user, signOut, userRole } = useAuth();
   const studentName = user?.user_metadata?.full_name || "Usuário";
-  const [classInfo, setClassInfo] = useState<{ name: string; code: string } | null>(null);
+  // Mock class info for screenshots
+  const [classInfo] = useState<{ name: string; code: string } | null>(
+    userRole === 'admin' ? { name: "Turma Engenharia 2024", code: "ABC123" } : null
+  );
 
   useEffect(() => {
     document.title = "Meu Perfil - Formae";
-    
-    // Fetch class info for admin users
-    const fetchClassInfo = async () => {
-      if (!user || userRole !== 'admin') return;
-      
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('class_id')
-        .eq('id', user.id)
-        .single();
-      
-      if (profile?.class_id) {
-        const { data: classData } = await supabase
-          .from('classes')
-          .select('name, code')
-          .eq('id', profile.class_id)
-          .single();
-        
-        if (classData) {
-          setClassInfo(classData);
-        }
-      }
-    };
-    
-    fetchClassInfo();
-  }, [user, userRole]);
+  }, []);
 
   const getInitials = (name: string) => {
     return name

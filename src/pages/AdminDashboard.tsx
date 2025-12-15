@@ -2,60 +2,26 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import BottomNavigation from "@/components/BottomNavigation";
 import SummaryCard from "@/components/SummaryCard";
-import { Wallet, TrendingUp, AlertCircle, Plus, MessageSquare, Calendar, Megaphone } from "lucide-react";
+import { Wallet, TrendingUp, AlertCircle, MessageSquare, Calendar, Megaphone } from "lucide-react";
 import { CreatePollDialog } from "@/components/CreatePollDialog";
 import { CreateAnnouncementDialog } from "@/components/CreateAnnouncementDialog";
 import CreateEventDialog from "@/components/CreateEventDialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
 
 const AdminDashboard = () => {
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  const [totalBalance, setTotalBalance] = useState(0);
-  const [monthlyIncome, setMonthlyIncome] = useState(0);
-  const [overdueRate, setOverdueRate] = useState(0);
   const [showCreatePoll, setShowCreatePoll] = useState(false);
   const [showCreateAnnouncement, setShowCreateAnnouncement] = useState(false);
   const [showCreateEvent, setShowCreateEvent] = useState(false);
 
+  // Mock data for screenshots
+  const totalBalance = 15750.00;
+  const monthlyIncome = 8400.00;
+  const overdueRate = 12;
+
   useEffect(() => {
     document.title = "Dashboard Admin - Formae";
-    fetchFinancialData();
   }, []);
-
-  const fetchFinancialData = async () => {
-    // Fetch total balance from transactions
-    const { data: transactions } = await supabase
-      .from("financial_transactions")
-      .select("type, amount");
-
-    if (transactions) {
-      const balance = transactions.reduce((acc, t) => {
-        return t.type === "income" ? acc + Number(t.amount) : acc - Number(t.amount);
-      }, 0);
-      setTotalBalance(balance);
-
-      // Calculate monthly income
-      const income = transactions
-        .filter(t => t.type === "income")
-        .reduce((acc, t) => acc + Number(t.amount), 0);
-      setMonthlyIncome(income);
-    }
-
-    // Calculate overdue rate
-    const { data: installments } = await supabase
-      .from("student_installments")
-      .select("status");
-
-    if (installments) {
-      const overdueCount = installments.filter(i => i.status === "overdue").length;
-      const rate = (overdueCount / installments.length) * 100;
-      setOverdueRate(Math.round(rate));
-    }
-  };
 
   return (
     <div className="min-h-screen bg-background pb-20">
